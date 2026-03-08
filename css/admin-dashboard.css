@@ -1,0 +1,171 @@
+:root {
+    --maroon: #800000;
+    --glass: rgba(255, 255, 255, 0.95);
+}
+
+body {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url('7-hero-page.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+}
+
+/* NAVBAR - Shadow effect for depth */
+.navbar {
+    background-color: var(--maroon) !important;
+    z-index: 2100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* SIDEBAR - Improved Width and Transitions */
+#sidebar {
+    position: fixed;
+    top: 56px;
+    left: -280px;
+    width: 280px;
+    height: calc(100% - 56px);
+    background: rgba(128, 0, 0, 1);
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2000;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding-bottom: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-footer .sidebar-btn {
+    border-top: none;
+    border-bottom: none;
+    width: 100%;
+    color: #f5f5dc;
+}
+
+.sidebar-open #sidebar {
+    left: 0;
+}
+
+/* SIDEBAR NAVIGATION */
+#sidebar .nav-label {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 25px 25px 10px;
+    font-weight: 700;
+    display: block;
+}
+
+.sidebar-btn {
+    background: none;
+    border: none;
+    border-left: 4px solid transparent;
+    color: rgba(255, 255, 255, 0.75);
+    padding: 14px 25px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    transition: 0.2s ease;
+    cursor: pointer;
+}
+
+.sidebar-btn i {
+    font-size: 1.25rem;
+    width: 35px;
+    display: inline-block;
+}
+
+.sidebar-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-btn.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+    border-left: 4px solid #fff;
+    font-weight: 600;
+}
+
+/* Dimmer Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1500;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+#close-sidebar:hover {
+    opacity: 1;
+}
+
+/* MAIN CONTENT AREA */
+.main-container {
+    background: var(--glass);
+    border-radius: 18px;
+    padding: 30px;
+    margin-top: 85px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+.view-section {
+    display: none;
+}
+
+.view-section.active {
+    display: block;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.item-img {
+    width: 55px;
+    height: 55px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #eee;
+}
+
+/* A specific class for round action buttons */
+.btn-circle-sm {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    padding: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50% !important;
+}
