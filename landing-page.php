@@ -1,4 +1,14 @@
 <?php
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '', 
+    'secure' => false,     // Set to true if you are using HTTPS
+    'httponly' => true,    // Prevents JS from accessing the cookie
+    'samesite' => 'Lax'    // The fix for "Cookie without SameSite Attribute" (Low Alert)
+]);
+
+ini_set('session.cookie_httponly', 1); // The fix for "Cookie No HttpOnly Flag" (Low Alert)
 session_start();
 
 // ----------- CSRF TOKEN -----------
