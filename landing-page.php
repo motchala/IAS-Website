@@ -1,8 +1,16 @@
 <?php
+// ── SECURITY: Strip server fingerprinting headers before anything else ──────
+// Prevents "X-Powered-By" and "Server" version leaks flagged by scanners.
+ini_set('expose_php', '0');          // stops PHP auto-adding X-Powered-By
+header_remove('X-Powered-By');       // belt-and-suspenders: remove if already queued
+header_remove('Server');             // PHP-level removal (catches some SAPI stacks)
+// Apache-level removal is handled by the companion .htaccess file.
+// ─────────────────────────────────────────────────────────────────────────────
+
 session_set_cookie_params([
     'lifetime' => 0,
     'path' => '/',
-    'domain' => '', 
+    'domain' => '',
     'secure' => false,     // Set to true if you are using HTTPS
     'httponly' => true,    // Prevents JS from accessing the cookie
     'samesite' => 'Lax'    // The fix for "Cookie without SameSite Attribute" (Low Alert)
@@ -195,11 +203,15 @@ $auto_open_modal = (!empty($login_error) || !empty($register_error) || !empty($r
          via the CSP style-src whitelist instead. -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- SRI hash locks this exact versioned file on cdnjs. If the CDN ever
-         serves a tampered copy the browser will refuse to load it. -->
+         serves a tampered copy the browser will refuse to load it.
+         NOTE: The previous hash (sha384-Gn5384...) belonged to Font Awesome 5.x
+         and caused a silent SRI failure on FA 6.x — that is why all icons were
+         invisible. Updated to FA 6.5.2 with its correct matching hash. -->
     <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-        crossorigin="anonymous">
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer">
 
     <link rel="stylesheet" href="css/landing-page.css">
 </head>

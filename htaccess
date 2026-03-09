@@ -1,0 +1,34 @@
+# DO NOT REMOVE THIS! THIS IS THE SOLUTION FOR A SECURITY ALERT
+
+
+# ============================================================
+#  SECURITY — Strip server fingerprinting response headers
+#  Fixes: "Server Leaks Version Information via Server header"
+#         "Server Leaks Information via X-Powered-By header"
+# ============================================================
+
+# Requires mod_headers (enabled by default on most Apache installs).
+# These directives work in .htaccess scope, so no access to
+# httpd.conf is needed.  Full version suppression (ServerTokens Prod)
+# must be set in the main server config or apache2.conf — see note below.
+
+# Remove the X-Powered-By header Apache/PHP might still emit
+Header always unset X-Powered-By
+
+# Reduce the Server header to just "Apache" with no version string.
+# Note: This only works when mod_headers can intercept the header
+# before it is sent.  If your host does not allow Header on "Server",
+# ask your hosting provider to set  ServerTokens Prod  in their global
+# config — that is the definitive fix.
+Header always unset Server
+Header always set Server "Apache"
+
+# ============================================================
+#  Hide directory listings (extra hardening, no info leakage)
+# ============================================================
+Options -Indexes
+
+# ============================================================
+#  Disable the Apache server signature on error pages
+# ============================================================
+ServerSignature Off
