@@ -59,10 +59,6 @@
         startProgress();
     }
 
-    window.carouselGo = function (dir) {
-        goTo(current + dir);
-    };
-
     function resetTimer() {
         clearInterval(timer);
         timer = setInterval(() => goTo(current + 1), INTERVAL);
@@ -72,6 +68,12 @@
     updateUI();
     startProgress();
     resetTimer();
+
+    /* Carousel arrow buttons — replaces onclick="carouselGo(±1)" */
+    document.getElementById('carouselPrev')
+        .addEventListener('click', () => goTo(current - 1));
+    document.getElementById('carouselNext')
+        .addEventListener('click', () => goTo(current + 1));
 
     /* Pause on hover */
     track.closest('.hero').addEventListener('mouseenter', () => {
@@ -88,15 +90,11 @@
     let touchStartX = 0;
     track.addEventListener('touchstart', e => {
         touchStartX = e.touches[0].clientX;
-    }, {
-        passive: true
-    });
+    }, { passive: true });
     track.addEventListener('touchend', e => {
         const dx = e.changedTouches[0].clientX - touchStartX;
         if (Math.abs(dx) > 40) goTo(current + (dx < 0 ? 1 : -1));
-    }, {
-        passive: true
-    });
+    }, { passive: true });
 })();
 
 
@@ -111,9 +109,8 @@
                 footer.classList.add('visible');
                 obs.disconnect();
             }
-        }, {
-        threshold: 0.05
-    }
+        },
+        { threshold: 0.05 }
     );
     obs.observe(footer);
 })();
@@ -131,7 +128,7 @@ function openModal(tab) {
     updateMinimizeIcon();
     overlay.classList.add('open');
     if (tab) switchTab(tab);
-    /* Only lock scroll when NOT in mobile-preview (frame handles its own scroll) */
+    /* Only lock scroll when NOT in mobile-preview */
     const frame = document.getElementById('phoneFrameWrap');
     if (!frame.classList.contains('mobile-preview')) {
         document.body.style.overflow = 'hidden';
@@ -148,29 +145,56 @@ function toggleMinimize() {
     isMin = !isMin;
     overlay.classList.toggle('minimized', isMin);
     updateMinimizeIcon();
-
-    if (isMin) {
-        document.body.style.overflow = ''; // restore scrolling
-    } else {
-        document.body.style.overflow = 'hidden'; // lock again when restored
-    }
+    document.body.style.overflow = isMin ? '' : 'hidden';
 }
 
 function updateMinimizeIcon() {
     const btn = document.getElementById('minimizeBtn');
-    btn.querySelector('i').className = isMin ?
-        'fa-solid fa-up-right-and-down-left-from-center' :
-        'fa-solid fa-minus';
+    btn.querySelector('i').className = isMin
+        ? 'fa-solid fa-up-right-and-down-left-from-center'
+        : 'fa-solid fa-minus';
     btn.title = isMin ? 'Restore' : 'Minimize';
 }
 
+/* Modal backdrop — replaces onclick="closeModal()" */
+document.getElementById('modalBackdrop')
+    .addEventListener('click', closeModal);
+
+/* Modal handle — replaces onclick/onkeydown="toggleMinimize()" */
+const modalHandle = document.getElementById('modalHandle');
+modalHandle.addEventListener('click', toggleMinimize);
+modalHandle.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') toggleMinimize();
+});
+
+/* Handle-actions area — replaces onclick="event.stopPropagation()" */
+document.getElementById('modalHandleActions')
+    .addEventListener('click', e => e.stopPropagation());
+
+/* Minimize button — replaces onclick/onkeydown="toggleMinimize()" */
+const minimizeBtn = document.getElementById('minimizeBtn');
+minimizeBtn.addEventListener('click', toggleMinimize);
+minimizeBtn.addEventListener('keydown', e => {
+    if (e.key === 'Enter') toggleMinimize();
+});
+
+/* Close button — replaces onclick/onkeydown="closeModal()" */
+const closeBtn = document.getElementById('closeBtn');
+closeBtn.addEventListener('click', closeModal);
+closeBtn.addEventListener('keydown', e => {
+    if (e.key === 'Enter') closeModal();
+});
+
+/* Escape key */
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         if (isMin) {
             isMin = false;
             overlay.classList.remove('minimized');
             updateMinimizeIcon();
-        } else closeModal();
+        } else {
+            closeModal();
+        }
     }
 });
 
@@ -189,9 +213,42 @@ function switchTab(tab) {
     document.getElementById('pane-' + tab).classList.add('active');
 }
 
+/* Auth tab buttons — replace onclick="switchTab(...)" */
+document.getElementById('tab-login')
+    .addEventListener('click', () => switchTab('login'));
+document.getElementById('tab-register')
+    .addEventListener('click', () => switchTab('register'));
+
+/* Modal footer "Register here" / "Sign in here" links */
+document.getElementById('goToRegister')
+    .addEventListener('click', () => switchTab('register'));
+document.getElementById('goToLogin')
+    .addEventListener('click', () => switchTab('login'));
+
 
 /* ================================================================
-   INPUT VALIDATORS
+   HERO CTA BUTTONS — replace onclick="openModal(...)"
+================================================================ */
+document.getElementById('heroLoginBtn')
+    .addEventListener('click', () => openModal('login'));
+document.getElementById('heroRegisterBtn')
+    .addEventListener('click', () => openModal('register'));
+
+
+/* ================================================================
+   FOOTER PORTAL LINKS — replace onclick="openModal(...); return false"
+   Uses data-modal="login|register" attribute
+================================================================ */
+document.querySelectorAll('a[data-modal]').forEach(a => {
+    a.addEventListener('click', e => {
+        e.preventDefault();
+        openModal(a.dataset.modal);
+    });
+});
+
+
+/* ================================================================
+   INPUT VALIDATORS — replace oninput="validateLetters...(this)"
 ================================================================ */
 function validateLettersName(input) {
     if (input.value.length > 0 && !/^[a-zA-Z]/.test(input.value)) {
@@ -240,6 +297,13 @@ function validateLettersEmail(input) {
     input.value = input.value.replace(/[^a-zA-Z0-9.@_-]/g, '');
 }
 
+document.getElementById('reg-name')
+    .addEventListener('input', function () { validateLettersName(this); });
+document.getElementById('reg-sid')
+    .addEventListener('input', function () { validateLettersStudentID(this); });
+document.getElementById('reg-email')
+    .addEventListener('input', function () { validateLettersEmail(this); });
+
 
 /* ================================================================
    AUTO-DISMISS ALERTS
@@ -257,9 +321,7 @@ setTimeout(() => {
 
 
 /* ================================================================
-   MOBILE VIEW TOGGLE
-   Creates a phone-frame preview centered in the browser window.
-   No browser resize needed — the UI itself scales to phone dimensions.
+   MOBILE VIEW TOGGLE — replaces onclick="toggleMobileView()"
 ================================================================ */
 let isMobilePreview = false;
 
@@ -279,11 +341,7 @@ function toggleMobileView() {
         label.textContent = 'Desktop Ready';
         btn.title = 'Exit mobile preview';
         closeModal();
-        /* Scroll browser window to top so hero fills the phone frame */
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
         html.classList.remove('mobile-preview-bg');
         frame.classList.remove('mobile-preview');
@@ -294,21 +352,32 @@ function toggleMobileView() {
     }
 }
 
+document.getElementById('mobileToggleBtn')
+    .addEventListener('click', toggleMobileView);
+document.getElementById('fmbDesktopBtn')
+    .addEventListener('click', toggleMobileView);
+
+
 /* ================================================================
-   PASSWORD VISIBILITY TOGGLE
+   PASSWORD VISIBILITY TOGGLE — replaces onclick="toggleEye(...)"
+   Uses data-target="<input-id>" attribute on each .eye-toggle button
 ================================================================ */
 function toggleEye(inputId, btn) {
     const input = document.getElementById(inputId);
     const icon = btn.querySelector('i');
     if (input.type === 'password') {
-        /* Currently hidden → reveal */
         input.type = 'text';
         icon.classList.replace('fa-eye-slash', 'fa-eye');
         btn.setAttribute('aria-label', 'Hide password');
     } else {
-        /* Currently visible → hide */
         input.type = 'password';
         icon.classList.replace('fa-eye', 'fa-eye-slash');
         btn.setAttribute('aria-label', 'Show password');
     }
 }
+
+document.querySelectorAll('.eye-toggle').forEach(btn => {
+    btn.addEventListener('click', function () {
+        toggleEye(this.dataset.target, this);
+    });
+});
